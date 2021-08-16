@@ -17,18 +17,52 @@
 ;;
 ;; Application
 
+;(connect-toplevel :postgres :database-name "hack" :username "hack" :password "hack")
+
 (defclass <web> (<app>) ())
 (defvar *web* (make-instance '<web>))
+(defmethod lack.component:call :around ((app <web>) env)
+  (let ((datafly:*connection*
+          (apply #'datafly:connect-cached (cdr (assoc :maindb (config :databases))))))
+    (prog1
+        (call-next-method))))
 (clear-routing-rules *web*)
+
+(defun login (name pass)
+  (handler-case 
+      (if (cl-pass:check-password pass (getf (get-user name) :pass))      
+          (setf (gethash :user *session*) name)
+          nil)
+    (error (e) nil)))
+
+(defun logout ()
+  (setf (gethash :user *session*) nil))
+
+(defun logged-in-p ()
+  (gethash :user *session*))
+
+(defmacro required-authorization (&rest body)
+  `(if (logged-in-p)
+       (progn ,@body)
+       (throw-code 403)))
 
 ;;
 ;; Routing rules
+
+(defroute "/login" (&key |name| |pass|)
+  (if (login |name| |pass|)
+      (redirect "/welcome")
+      (render-json '("User not found."))))
+
+(defroute "/logout" ()
+  (logout)
+  (redirect "/welcome"))
 
 (defroute "/" ()
   (render #P"index.html"))
 
 (defroute "/welcome" (&key (|name| "Guest"))
-  (format nil "Welcome, ~A" |name|))
+  (format nil "Welcome, ~A" (or (logged-in-p) |name|)))
 
 (defroute "/wrong" ()
   (redirect "/welcome?name=jerk"))
@@ -37,12 +71,12 @@
   (setf (getf (response-headers *response*) :content-type) "application/json")
   (next-route))
 
-(defroute "/test.json" (&key |name|)
-  (let ((person (search-test |name|)))
-    (render-json person)))
-
 (defroute "/users" ()
-  (render-json (get-users)))
+  (required-authorization 
+   (render-json (get-users))))
+
+(defroute "/test" (&key (|name| "vic"))
+  (render-json (get-test |name|)))
 
 ;;
 ;; Error pages
@@ -51,3 +85,11 @@
   (declare (ignore app))
   (merge-pathnames #P"_errors/404.html"
                    *template-directory*))
+
+(defmethod null-arg ((app <web>) (code (eql 400)))
+  (declare (ignore app))
+  (render-json '("Wrong arguments.")))
+
+(defmethod not-authorized ((app <web>) (code (eql 403)))
+  (declare (ignore app))
+  (render-json '("Not authorized.")))

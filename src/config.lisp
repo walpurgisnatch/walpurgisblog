@@ -20,7 +20,7 @@
 (defparameter *template-directory* (merge-pathnames #P"templates/" *application-root*))
 
 (defconfig :common
-  `(:databases ((:maindb :postgres :database-name "walpurgisblog" :username "walpurgisblog" :password "walpurgisblog"))))
+  `(:databases ((:maindb :postgres :database-name "hack" :username "hack" :password "hack"))))
 
 (defconfig |development|
   '())

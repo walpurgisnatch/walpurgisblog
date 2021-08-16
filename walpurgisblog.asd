@@ -18,10 +18,11 @@
                ;; for DB
                "datafly"
                "sxql"
-               "mito")
+               "mito"
+               "cl-pass")
   :components ((:module "src"
                 :components
-                ((:file "users" :depends-on ("db"))
+                ((:file "models/users" :depends-on ("db"))
                  (:file "main" :depends-on ("config" "view" "db"))
                  (:file "web" :depends-on ("view"))
                  (:file "view" :depends-on ("config"))
