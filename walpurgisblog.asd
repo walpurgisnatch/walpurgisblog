@@ -8,25 +8,26 @@
                "envy"
                "cl-ppcre"
                "uiop"
-
-               ;; for @route annotation
                "cl-syntax-annot"
-
-               ;; HTML Template
                "djula"
-
-               ;; for DB
                "datafly"
                "sxql"
                "mito"
-               "cl-pass")
+               "cl-pass"
+               "jose"
+               "local-time")
   :components ((:module "src"
                 :components
-                ((:file "models/users" :depends-on ("db"))
+                ((:file "models/users" :depends-on ("models"))
+                 (:file "models/posts" :depends-on ("models"))
                  (:file "main" :depends-on ("config" "view" "db"))
                  (:file "web" :depends-on ("view"))
                  (:file "view" :depends-on ("config"))
                  (:file "db" :depends-on ("config"))
-                 (:file "config"))))
+                 (:file "models" :depends-on ("config" "db"))
+                 (:file "config")))
+               (:module "db"
+                :components
+                ((:file "schema"))))
   :description ""
   :in-order-to ((test-op (test-op "walpurgisblog-test"))))

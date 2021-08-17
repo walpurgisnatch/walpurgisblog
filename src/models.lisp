@@ -1,36 +1,41 @@
 (in-package :cl-user)
 (defpackage walpurgisblog.models
-  (:use :cl :mito))
+  (:use :cl :sxql :cl-annot.class :datafly)
+  (:export :users-posts
+           :posts-owner))
 
 (in-package :walpurgisblog.models)
 
-(mito:connect-toplevel :postgres :database-name "hack" :username "hack" :password "hack")
+(syntax:use-syntax :annot)
 
-(defun ensure-tables ()
-  (mapcar #'ensure-table-exists '(users posts)))
+@export-accessors
+@export
+(defmodel (posts (:inflate created-at #'datetime-to-timestamp)
+                 (:inflate updated-at #'datetime-to-timestamp)
+                 (:has-a (owner users) (where (:= :id user))))
+  id
+  title
+  body
+  attachments
+  user
+  created-at
+  updated-at)
 
-(defun migrate-tables ()
-  (mapcar #'migrate-table '(users posts)))
-
-;(ensure-table-exists 'users)
-;(print (migration-expressions 'users))
-;(migrate-table 'users)
-
-(deftable users ()
-  ((name :col-type (:varchar 64))
-   (email :col-type (:varchar 128))
-   (pass :col-type (:varchar 128))
-   (status :col-type (or (:varchar 256) :null))
-   (rating :col-type :integer)
-   (role :col-type :integer)))
-
-(deftable posts ()
-  ((title :col-type (:varchar 64))
-   (body :col-type (:varchar 2048))
-   (user-id :references users))
-  (:unique-keys body))
-
-
-(ensure-tables)
-
+@export-accessors
+@export
+(defmodel (users (:inflate created-at #'datetime-to-timestamp)
+                 (:inflate updated-at #'datetime-to-timestamp)
+                 (:has-many (posts posts)
+                            (select :*
+                              (from :posts)
+                              (where (:= :user id))
+                              (order-by (:desc :created_at)))))
+  id
+  name
+  email
+  status
+  rating
+  role
+  created-at
+  updated-at)
 

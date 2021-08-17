@@ -17,7 +17,7 @@
 ;;
 ;; Application
 
-;(connect-toplevel :postgres :database-name "hack" :username "hack" :password "hack")
+(connect-toplevel :postgres :database-name "hack" :username "hack" :password "hack")
 
 (defclass <web> (<app>) ())
 (defvar *web* (make-instance '<web>))
@@ -86,10 +86,10 @@
   (merge-pathnames #P"_errors/404.html"
                    *template-directory*))
 
-(defmethod null-arg ((app <web>) (code (eql 400)))
+(defmethod on-exception ((app <web>) (code (eql 400)))
   (declare (ignore app))
   (render-json '("Wrong arguments.")))
 
-(defmethod not-authorized ((app <web>) (code (eql 403)))
+(defmethod on-exception ((app <web>) (code (eql 403)))
   (declare (ignore app))
   (render-json '("Not authorized.")))
