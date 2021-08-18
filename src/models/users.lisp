@@ -8,10 +8,21 @@
   (:export :get-user
            :find-user
            :get-users
-           :create-user))
+   :create-user
+   :login-user))
 
 (in-package :walpurgisblog.users)
 
+
+(defun login-user (name pass)
+  (let ((user (retrieve-one
+               (select :*
+                 (from :users)
+                 (where (:= :name name))))))
+    (when (cl-pass:check-password pass (getf user :pass))
+      (list (cons "id" (getf user :id))
+            (cons "name" (getf user :username))
+            (cons "role" (getf user :role))))))
 
 (defun get-user (id)
   (retrieve-one

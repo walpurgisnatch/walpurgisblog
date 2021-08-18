@@ -31,21 +31,31 @@
         (call-next-method))))
 (clear-routing-rules *web*)
 
+(defvar *key* (ironclad:ascii-string-to-byte-array "my$ecret"))
+
 (defun login (name pass)
-  (handler-case 
-      (if (cl-pass:check-password pass (getf (get-user name) :pass))      
-          (setf (gethash :user *session*) name)
-          nil)
-    (error (e) nil)))
+  (handler-case
+      (let ((user (login-user name pass)))
+        (if (user)
+            (jose:encode :hs256 *key* user)
+            nil)
+        (error (e) nil))))
 
 (defun logout ()
   (setf (gethash :user *session*) nil))
 
-(defun logged-in-p ()
-  (gethash :user *session*))
+(defun privileged (token &optional name role)
+  (handler-case
+      (let ((data (jose:inspect-token token)))
+        (cond (name
+               (equal name (cdr (assoc "name" data :test #'equalp))))
+              (role
+               (equal role (cdr (assoc "role" data :test #'equalp))))
+              (t t)))
+    (error (e) nil)))
 
-(defmacro required-authorization (&rest body)
-  `(if (logged-in-p)
+(defmacro required-authorization (token name role &body body)
+  `(if (privileged ,token ,name ,role)
        (progn ,@body)
        (throw-code 403)))
 
