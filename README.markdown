@@ -1,16 +1,8 @@
 # walpurgisblog
+Source code for walpurgisblog
 
-
-
-## Usage
-
-## Installation
-
-## Author
-
-* <Walpurgisnatch>
 
 ## Copyright
 
-Copyright (c) 2021 <Walpurgisnatch>
+Copyright (c) 2021 Walpurgisnatch
 
