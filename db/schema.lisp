@@ -6,12 +6,11 @@
 
 (mito:connect-toplevel :postgres :database-name "hack" :username "hack" :password "hack")
 
-
 (defun ensure-tables ()
-  (mapcar #'ensure-table-exists '(users posts comments)))
+  (mapcar #'ensure-table-exists '(users articles comments)))
 
 (defun migrate-tables ()
-  (mapcar #'migrate-table '(users posts comments)))
+  (mapcar #'migrate-table '(users articles comments)))
 
 (deftable users ()
   ((name          :col-type (:varchar 64))
@@ -21,7 +20,7 @@
    (rating        :col-type :integer)
    (role          :col-type :integer)))
 
-(deftable posts ()
+(deftable articles ()
   ((title         :col-type (:varchar 64))
    (body          :col-type :text)
    (attachments   :col-type (:varchar 128))
@@ -30,7 +29,8 @@
 (deftable comments ()
   ((body          :col-type :text)
    (user          :references users)
-   (post          :references posts)
+   (username      :col-type (or (:varchar 64) :null))
+   (article       :references articles)
    (rating        :col-type :integer)))
 
 

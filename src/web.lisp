@@ -7,7 +7,10 @@
         :walpurgisblog.db
         :datafly
         :sxql
-        :walpurgisblog.users)
+        :walpurgisblog.models
+   :walpurgisblog.users
+   :walpurgisblog.articles
+   :walpurgisblog.comments)
   (:export :*web*))
 (in-package :walpurgisblog.web)
 
@@ -17,7 +20,7 @@
 ;;
 ;; Application
 
-(connect-toplevel :postgres :database-name "hack" :username "hack" :password "hack")
+;(datafly:connect-toplevel :postgres :database-name "hack" :username "hack" :password "hack")
 
 (defclass <web> (<app>) ())
 (defvar *web* (make-instance '<web>))
@@ -58,25 +61,35 @@
   (logout)
   (redirect "/welcome"))
 
-(defroute "/" ()
-  (render #P"index.html"))
-
 (defroute "/welcome" (&key (|name| "Guest"))
   (format nil "Welcome, ~A" (or (logged-in-p) |name|)))
 
 (defroute "/wrong" ()
   (redirect "/welcome?name=jerk"))
 
-(defroute "/*.json" ()
-  (setf (getf (response-headers *response*) :content-type) "application/json")
-  (next-route))
+;; (defroute "/api/*" ()  
+;;   (setf (getf (response-headers *response*) :Access-Control-Allow-Origin) "*")
+;;   (next-route))
 
-(defroute "/users" ()
+(defroute "/api/users" ()
   (required-authorization 
    (render-json (get-users))))
 
-(defroute "/test" (&key (|name| "vic"))
-  (render-json (get-test |name|)))
+(defroute "/api/articles" ()
+  (setf (getf (response-headers *response*) :Access-Control-Allow-Origin) "*")
+  (render-json (get-articles)))
+
+(defroute "/api/article/:id" (&key id)
+  (setf (getf (response-headers *response*) :Access-Control-Allow-Origin) "*")
+  (render-json (get-article id)))
+
+(defroute ("/api/comments" :method :POST) (&key |body| |article| |user| |username|)
+  (setf (getf (response-headers *response*) :Access-Control-Allow-Origin) "*")
+  (create-comment |body| |article| |user| |username|))
+
+(defroute ("/api/comments" :method :OPTIONS) ()
+  (setf (getf (response-headers *response*) :Access-Control-Allow-Origin) "*")
+  (setf (getf (response-headers *response*) :Access-Control-Allow-Headers) "*"))
 
 ;;
 ;; Error pages
