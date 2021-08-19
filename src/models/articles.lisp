@@ -6,7 +6,8 @@
         :datafly)
   (:export  :get-articles
             :create-article
-            :get-article))
+            :get-article
+            :last-user-article))
 
 (in-package :walpurgisblog.articles)
 
@@ -24,16 +25,26 @@
   (retrieve-all
    (select :*
      (from :articles)
-     (where (:like :title (concatenate 'string "%" title "%"))))
+     (where (:like :title (concatenate 'string "%" title "%")))
+     (order-by (:desc :created_at)))
    :as 'articles))
 
+(defun last-user-article (user)
+  (retrieve-one
+   (select :id
+     (from :articles)
+     (where (:= :user user))
+     (order-by (:desc :created_at)))))
+
 (defun create-article (title body attachments user)
-  (execute
-   (insert-into :articles
-     (set= :title title
-           :body body
-           :attachments attachments
-           :user user
-           :rating 0
-           :created_at (local-time:now)
-           :updated_at (local-time:now)))))
+  (handler-case 
+      (execute
+       (insert-into :articles
+         (set= :title title
+               :body body
+               :attachments attachments
+               :user user
+               :rating 0
+               :created_at (local-time:now)
+               :updated_at (local-time:now))))      
+    (error (e) e)))

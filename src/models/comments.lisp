@@ -22,16 +22,21 @@
   (retrieve-all
    (select :*
      (from :comments)
-     (where (:= :article article)))
+     (where (:= :article article))
+     (order-by (:desc :created_at)))
    :as 'comments))
 
-(defun create-comment (body article &optional (user 0) (username "Guest"))
-  (execute
-   (insert-into :comments
-     (set= :user user
-           :username username
-           :body body
-           :article article
-           :rating 0
-           :created_at (local-time:now)
-           :updated_at (local-time:now)))))
+(defun create-comment (body article &optional (user 0) username)
+  (when (string= "" username)
+    (setf username "Guest"))
+  (handler-case 
+      (execute
+       (insert-into :comments
+         (set= :user user
+               :username username
+               :body body
+               :article article
+               :rating 0
+               :created_at (local-time:now)
+               :updated_at (local-time:now))))
+    (error (e) e)))

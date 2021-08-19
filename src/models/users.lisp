@@ -48,13 +48,15 @@
    :as 'users))
 
 (defun create-user (name mail pass &key status (rating 0) (role 3))
-  (execute
-   (insert-into :users
-     (set= :name name
-           :email mail
-           :pass (cl-pass:hash pass)
-           :status status
-           :rating rating
-           :role role
-           :created_at (local-time:now)
-           :updated_at (local-time:now)))))
+  (handler-case 
+      (execute
+       (insert-into :users
+         (set= :name name
+               :email mail
+               :pass (cl-pass:hash pass)
+               :status status
+               :rating rating
+               :role role
+               :created_at (local-time:now)
+               :updated_at (local-time:now))))
+    (error (e) e)))

@@ -78,7 +78,8 @@
 
 (defroute ("/api/signup" :method :POST) (&key |username| |email| |password| (|status| ""))
   (setf (getf (response-headers *response*) :Access-Control-Allow-Origin) "*")
-  (create-user |username| |email| |password| :status |status|))
+  (unless (create-user |username| |email| |password| :status |status|)
+    (throw-code 200)))
 
 (defroute ("/api/signup" :method :OPTIONS) ()
   (setf (getf (response-headers *response*) :Access-Control-Allow-Origin) "*")
@@ -112,19 +113,21 @@
 
 (defroute ("/api/articles" :method :POST) (&key |title| |body| |attachments| |user|)
   (setf (getf (response-headers *response*) :Access-Control-Allow-Origin) "*")
-  (create-article |title| |body| |attachments| |user|))
+  (unless (create-article |title| |body| |attachments| |user|)
+    (render-json (last-user-article |user|))))
 
 (defroute ("/api/articles" :method :OPTIONS) ()
   (setf (getf (response-headers *response*) :Access-Control-Allow-Origin) "*")
   (setf (getf (response-headers *response*) :Access-Control-Allow-Headers) "*"))
 
-(defroute "/api/comments" (&key |article|)
+(defroute "/api/comments/:id" (&key id)
   (setf (getf (response-headers *response*) :Access-Control-Allow-Origin) "*")
-  (get-comments |article|))
+  (render-json (get-comments id)))
 
 (defroute ("/api/comments" :method :POST) (&key |body| |article| |user| |username|)
   (setf (getf (response-headers *response*) :Access-Control-Allow-Origin) "*")
-  (create-comment |body| |article| |user| |username|))
+  (unless (create-comment |body| |article| |user| |username|)
+    (throw-code 200)))
 
 (defroute ("/api/comments" :method :OPTIONS) ()
   (setf (getf (response-headers *response*) :Access-Control-Allow-Origin) "*")
