@@ -71,8 +71,8 @@
         (redirect (format nil "/welcome?token=~a" token))
         (render-json '("User not found.")))))
 
-(defrout ("/signup" :method :POST) (&key |name| |mail| |pass| (|status| ""))
-  (create-user |name| |mail| |pass| |status|))
+(defroute ("/api/signup" :method :POST) (&key |name| |mail| |pass| (|status| ""))
+  (create-user |name| |mail| |pass| :status |status|))
 
 (defroute "/logout" ()
   (logout)
