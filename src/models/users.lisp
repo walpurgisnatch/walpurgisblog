@@ -19,10 +19,13 @@
                (select :*
                  (from :users)
                  (where (:= :name name))))))
-    (when (cl-pass:check-password pass (getf user :pass))
-      (list (cons "id" (getf user :id))
-            (cons "name" (getf user :username))
-            (cons "role" (getf user :role))))))
+    (handler-case 
+        (when (cl-pass:check-password pass (getf user :pass))
+          (print user)
+          (list (cons "id" (getf user :id))
+                (cons "name" (getf user :name))
+                (cons "role" (getf user :role))))
+      (error nil))))
 
 (defun get-user (id)
   (retrieve-one

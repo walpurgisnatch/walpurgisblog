@@ -7,7 +7,8 @@
         :walpurgisblog.db
         :datafly
         :sxql
-        :walpurgisblog.models
+   :walpurgisblog.models
+   :walpurgisblog.utils
    :walpurgisblog.users
    :walpurgisblog.articles
    :walpurgisblog.comments)
@@ -36,10 +37,10 @@
 (defun login (name pass)
   (handler-case
       (let ((user (login-user name pass)))
-        (if (user)
+        (if user
             (jose:encode :hs256 *key* user)
-            nil)
-        (error (e) nil))))
+            nil))
+    (error nil)))
 
 (defun logout ()
   (setf (gethash :user *session*) nil))
@@ -48,13 +49,15 @@
   (handler-case
       (let ((data (jose:inspect-token token)))
         (cond (name
-               (equal name (cdr (assoc "name" data :test #'equalp))))
+                (equal name (cdr (assoc "name" data :test #'equalp)))
+                data)
               (role
-               (equal role (cdr (assoc "role" data :test #'equalp))))
+                (equal role (cdr (assoc "role" data :test #'equalp)))
+                data)
               (t t)))
-    (error (e) nil)))
+    (error nil)))
 
-(defmacro required-authorization (token name role &body body)
+(defmacro required-authorization ((token &key name role) &body body) 
   `(if (privileged ,token ,name ,role)
        (progn ,@body)
        (throw-code 403)))
@@ -62,17 +65,21 @@
 ;;
 ;; Routing rules
 
-(defroute "/login" (&key |name| |pass|)
-  (if (login |name| |pass|)
-      (redirect "/welcome")
-      (render-json '("User not found."))))
+(defroute "/login" (&key (|name| "") (|pass| ""))
+  (let ((token (login |name| |pass|)))
+    (if token
+        (redirect (format nil "/welcome?token=~a" token))
+        (render-json '("User not found.")))))
+
+(defrout ("/signup" :method :POST) (&key |name| |mail| |pass| (|status| ""))
+  (create-user |name| |mail| |pass| |status|))
 
 (defroute "/logout" ()
   (logout)
   (redirect "/welcome"))
 
-(defroute "/welcome" (&key (|name| "Guest"))
-  (format nil "Welcome, ~A" (or (logged-in-p) |name|)))
+(defroute "/welcome" (&key (|name| "Guest") (|token| ""))
+  (format nil "Welcome, ~A" (or (from-token 'name |token|) |name|)))
 
 (defroute "/wrong" ()
   (redirect "/welcome?name=jerk"))
@@ -81,8 +88,8 @@
 ;;   (setf (getf (response-headers *response*) :Access-Control-Allow-Origin) "*")
 ;;   (next-route))
 
-(defroute "/api/users" ()
-  (required-authorization 
+(defroute "/api/users" (&key |token|)
+  (required-authorization (|token| :role 0)
    (render-json (get-users))))
 
 (defroute "/api/articles" ()

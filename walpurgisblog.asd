@@ -21,6 +21,7 @@
                 ((:file "models/users" :depends-on ("models"))
                  (:file "models/articles" :depends-on ("models"))
                  (:file "models/comments" :depends-on ("models"))
+                 (:file "utils")
                  (:file "main" :depends-on ("config" "view" "db"))
                  (:file "web" :depends-on ("view"))
                  (:file "view" :depends-on ("config"))
