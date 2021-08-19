@@ -130,6 +130,9 @@
   (setf (getf (response-headers *response*) :Access-Control-Allow-Origin) "*")
   (setf (getf (response-headers *response*) :Access-Control-Allow-Headers) "*"))
 
+(defroute "*" ()
+  (render #P"index.html"))
+
 ;;
 ;; Error pages
 
