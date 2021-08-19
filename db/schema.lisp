@@ -23,7 +23,7 @@
 (deftable articles ()
   ((title         :col-type (:varchar 64))
    (body          :col-type :text)
-   (attachments   :col-type (:varchar 128))
+   (attachments   :col-type (or (:varchar 128) :null))
    (user          :references users)
    (rating        :col-type :integer)))
 

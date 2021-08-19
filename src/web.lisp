@@ -65,14 +65,24 @@
 ;;
 ;; Routing rules
 
-(defroute "/login" (&key (|name| "") (|pass| ""))
-  (let ((token (login |name| |pass|)))
+(defroute ("/login" :method :POST) (&key (|username| "") (|password| ""))
+  (setf (getf (response-headers *response*) :Access-Control-Allow-Origin) "*")
+  (let ((token (login |username| |password|)))
     (if token
         (redirect (format nil "/welcome?token=~a" token))
         (render-json '("User not found.")))))
 
-(defroute ("/api/signup" :method :POST) (&key |name| |mail| |pass| (|status| ""))
-  (create-user |name| |mail| |pass| :status |status|))
+(defroute ("/login" :method :OPTIONS) ()
+  (setf (getf (response-headers *response*) :Access-Control-Allow-Origin) "*")
+  (setf (getf (response-headers *response*) :Access-Control-Allow-Headers) "*"))
+
+(defroute ("/api/signup" :method :POST) (&key |username| |email| |password| (|status| ""))
+  (setf (getf (response-headers *response*) :Access-Control-Allow-Origin) "*")
+  (create-user |username| |email| |password| :status |status|))
+
+(defroute ("/api/signup" :method :OPTIONS) ()
+  (setf (getf (response-headers *response*) :Access-Control-Allow-Origin) "*")
+  (setf (getf (response-headers *response*) :Access-Control-Allow-Headers) "*"))
 
 (defroute "/logout" ()
   (logout)
@@ -99,6 +109,18 @@
 (defroute "/api/article/:id" (&key id)
   (setf (getf (response-headers *response*) :Access-Control-Allow-Origin) "*")
   (render-json (get-article id)))
+
+(defroute ("/api/articles" :method :POST) (&key |title| |body| |attachments| |user|)
+  (setf (getf (response-headers *response*) :Access-Control-Allow-Origin) "*")
+  (create-article |title| |body| |attachments| |user|))
+
+(defroute ("/api/articles" :method :OPTIONS) ()
+  (setf (getf (response-headers *response*) :Access-Control-Allow-Origin) "*")
+  (setf (getf (response-headers *response*) :Access-Control-Allow-Headers) "*"))
+
+(defroute "/api/comments" (&key |article|)
+  (setf (getf (response-headers *response*) :Access-Control-Allow-Origin) "*")
+  (get-comments |article|))
 
 (defroute ("/api/comments" :method :POST) (&key |body| |article| |user| |username|)
   (setf (getf (response-headers *response*) :Access-Control-Allow-Origin) "*")

@@ -11,13 +11,6 @@
 (in-package :walpurgisblog.articles)
 
 
-;; (defun get-article (id)
-;;   (retrieve-one
-;;    (select :*
-;;      (from :articles)
-;;      (where (:= :id id)))
-;;    :as 'articles))
-
 (defun get-article (id)
   (let ((article (retrieve-one
                   (select :*
@@ -41,5 +34,6 @@
            :body body
            :attachments attachments
            :user user
+           :rating 0
            :created_at (local-time:now)
            :updated_at (local-time:now)))))

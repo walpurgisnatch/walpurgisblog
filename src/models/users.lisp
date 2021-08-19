@@ -21,7 +21,6 @@
                  (where (:= :name name))))))
     (handler-case 
         (when (cl-pass:check-password pass (getf user :pass))
-          (print user)
           (list (cons "id" (getf user :id))
                 (cons "name" (getf user :name))
                 (cons "role" (getf user :role))))
