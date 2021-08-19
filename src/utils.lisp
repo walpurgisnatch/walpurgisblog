@@ -9,5 +9,7 @@
   (handler-case 
       (cdr (assoc (string var) (jose:inspect-token token) :test #'equalp))
     (error nil)))
-  
 
+(defun key (arg)
+  (intern (string arg) :keyword))
+  

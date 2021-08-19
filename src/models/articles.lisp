@@ -5,9 +5,12 @@
         :sxql
         :datafly)
   (:export  :get-articles
-            :create-article
             :get-article
-            :last-user-article))
+            :create-article
+            :last-user-article
+            :update-article
+            :delete-article
+            :rate-article))
 
 (in-package :walpurgisblog.articles)
 
@@ -46,5 +49,27 @@
                :user user
                :rating 0
                :created_at (local-time:now)
-               :updated_at (local-time:now))))      
+               :updated_at (local-time:now))
+         (returning :id)))
     (error (e) e)))
+
+
+(defun update-article (id title body attachments rating)
+  (execute 
+   (update :articles
+     (set= :title title
+           :body body
+           :attachments attachments
+           :rating rating)
+     (where (:= :id id)))))
+
+(defun rate-article (id)
+  (execute
+   (update :articles
+     (set= :rating (:+ :rating 1)))))
+
+(defun delete-article (id)
+  (execute 
+   (delete-from :articles
+     (where (:= :id id)))))
+

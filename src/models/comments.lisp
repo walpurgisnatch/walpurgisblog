@@ -4,9 +4,12 @@
         :walpurgisblog.models
         :sxql
         :datafly)
-  (:export  :get-comments
-            :create-comment
-            :get-comment))
+  (:export :get-comments
+           :get-comment
+           :create-comment
+           :update-comment
+           :rate-comment
+           :delete-comment))
 
 (in-package :walpurgisblog.comments)
 
@@ -40,3 +43,21 @@
                :created_at (local-time:now)
                :updated_at (local-time:now))))
     (error (e) e)))
+
+(defun update-comment (id username body rating)
+  (execute
+   (update :comments
+     (set= :username   username
+           :body       body
+           :updated_at (local-time:now))
+     (where (:= :id id)))))
+
+(defun rate-comment (id)
+  (execute
+   (update :comments
+     (set= :rating (:+ :rating 1)))))
+
+(defun delete-comment (id)
+  (execute
+   (delete-from :comments
+     (where (:= :id id)))))

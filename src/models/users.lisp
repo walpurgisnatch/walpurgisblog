@@ -6,10 +6,12 @@
         :cl-annot.class
         :datafly)
   (:export :get-user
-           :find-user
            :get-users
-   :create-user
-   :login-user))
+           :find-user
+           :create-user
+           :login-user
+           :update-user
+           :delete-user))
 
 (in-package :walpurgisblog.users)
 
@@ -60,3 +62,22 @@
                :created_at (local-time:now)
                :updated_at (local-time:now))))
     (error (e) e)))
+
+(defun update-user (id name mail pass status rating)
+  (execute
+   (update :users
+     (set= :name name
+           :email mail
+           :pass pass
+           :status status
+           :updated_at (local-time:now)))))
+
+(defun rate-user (id)
+  (execute
+   (update :users
+     (set= :rating (:+ :rating 1)))))
+
+(defun delete-user (id)
+  (execute
+   (delete-from :users
+     (where (:= :id id)))))

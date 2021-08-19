@@ -110,14 +110,17 @@
   (render-json (get-article id)))
 
 (defroute ("/api/articles" :method :POST) (&key |title| |body| |attachments| |user|)
-  (unless (create-article |title| |body| |attachments| |user|)
-    (render-json (last-user-article |user|))))
+  (render-json (create-article |title| |body| |attachments| |user|)))
 
 (defroute "/api/comments/:id" (&key id)
   (render-json (get-comments id)))
 
 (defroute ("/api/comments" :method :POST) (&key |body| |article| |user| |username|)
   (unless (create-comment |body| |article| |user| |username|)
+    (throw-code 200)))
+
+(defroute ("/api/comments" :method :DELETE) (&key |id|)
+  (unless (delete-comment |id|)
     (throw-code 200)))
 
 (defroute "*" ()
