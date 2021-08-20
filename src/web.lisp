@@ -90,22 +90,23 @@
 (defroute ("/login" :method :POST) (&key (|username| "") (|password| ""))
   (setf (getf (response-headers *response*) :Access-Control-Allow-Origin) "*")
   (let ((token (login |username| |password|)))
-    (print token)
     (if token
         (render-json token)
-        (render-json '("User not found.")))))
+        (throw-code 400))))
 
 (defroute ("/api/signup" :method :POST) (&key |username| |email| |password| (|status| ""))
   (unless (create-user |username| |email| |password| :status |status|)
     (throw-code 200)))
 
 (defroute "/logout" ()
-  (logout)
-  (redirect "/welcome"))
+  (logout))
 
 (defroute "/api/users" (&key |token|)
   (required-authorization (|token| :role 0)
-   (render-json (get-users))))
+    (render-json (get-users))))
+
+(defroute "/api/user" (&key |token|)
+  (render-json (get-user (from-token 'id |token|))))
 
 (defroute "/api/articles" ()
   (render-json (get-articles)))
