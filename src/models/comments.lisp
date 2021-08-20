@@ -44,7 +44,7 @@
                :updated_at (local-time:now))))
     (error (e) e)))
 
-(defun update-comment (id username body rating)
+(defun update-comment (id username body)
   (execute
    (update :comments
      (set= :username   username
@@ -55,7 +55,8 @@
 (defun rate-comment (id)
   (execute
    (update :comments
-     (set= :rating (:+ :rating 1)))))
+     (set= :rating (:+ :rating 1))
+     (where (:= :id id)))))
 
 (defun delete-comment (id)
   (execute
