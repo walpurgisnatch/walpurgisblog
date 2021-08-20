@@ -73,16 +73,26 @@
   (setf (getf (response-headers *response*) :Access-Control-Allow-Origin) "*")
   (next-route))
 
+(defroute ("/api/*" :method :DELETE) ()
+  (setf (getf (response-headers *response*) :Access-Control-Allow-Origin) "*")
+  (next-route))
+
+(defroute ("/api/*" :method :PUT) ()
+  (setf (getf (response-headers *response*) :Access-Control-Allow-Origin) "*")
+  (next-route))
+
 (defroute ("/*" :method :OPTIONS) ()
   (setf (getf (response-headers *response*) :Access-Control-Allow-Origin) "*")
   (setf (getf (response-headers *response*) :Access-Control-Allow-Headers) "*")
+  (setf (getf (response-headers *response*) :Access-Control-Allow-Methods) "*")  
   (next-route))
 
 (defroute ("/login" :method :POST) (&key (|username| "") (|password| ""))
   (setf (getf (response-headers *response*) :Access-Control-Allow-Origin) "*")
   (let ((token (login |username| |password|)))
+    (print token)
     (if token
-        (redirect (format nil "/welcome?token=~a" token))
+        (render-json token)
         (render-json '("User not found.")))))
 
 (defroute ("/api/signup" :method :POST) (&key |username| |email| |password| (|status| ""))
@@ -92,12 +102,6 @@
 (defroute "/logout" ()
   (logout)
   (redirect "/welcome"))
-
-(defroute "/welcome" (&key (|name| "Guest") (|token| ""))
-  (format nil "Welcome, ~A" (or (from-token 'name |token|) |name|)))
-
-(defroute "/wrong" ()
-  (redirect "/welcome?name=jerk"))
 
 (defroute "/api/users" (&key |token|)
   (required-authorization (|token| :role 0)
@@ -119,8 +123,12 @@
   (unless (create-comment |body| |article| |user| |username|)
     (throw-code 200)))
 
-(defroute ("/api/comments" :method :DELETE) (&key |id|)
-  (unless (delete-comment |id|)
+(defroute ("/api/comment/:id" :method :DELETE) (&key id)
+  (unless (delete-comment id)
+    (throw-code 200)))
+
+(defroute ("/api/article/:id" :method :DELETE) (&key id)
+  (unless (delete-article id)
     (throw-code 200)))
 
 (defroute "*" ()

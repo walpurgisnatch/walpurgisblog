@@ -66,7 +66,8 @@
 (defun rate-article (id)
   (execute
    (update :articles
-     (set= :rating (:+ :rating 1)))))
+     (set= :rating (:+ :rating 1))
+     (where (:= :id id)))))
 
 (defun delete-article (id)
   (execute 

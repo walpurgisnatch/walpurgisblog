@@ -63,19 +63,21 @@
                :updated_at (local-time:now))))
     (error (e) e)))
 
-(defun update-user (id name mail pass status rating)
+(defun update-user (id name mail pass status)
   (execute
    (update :users
      (set= :name name
            :email mail
            :pass pass
            :status status
-           :updated_at (local-time:now)))))
+           :updated_at (local-time:now))
+     (where (:= :id id)))))
 
 (defun rate-user (id)
   (execute
    (update :users
-     (set= :rating (:+ :rating 1)))))
+     (set= :rating (:+ :rating 1))
+     (where (:= :id id)))))
 
 (defun delete-user (id)
   (execute
