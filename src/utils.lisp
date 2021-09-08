@@ -32,16 +32,22 @@
          :updated_at (local-time:now))
         (where (:= ,@where)))))
 
-(defmacro find-where (table where)
-  (let ((data (gensym)))
-    `(let ((,data (retrieve-all
-                   (select :*
-                     (from ,(key table))
-                     (where ,where)
-                     :as ',table))))
-       (if (and (consp ,data) (null (cdr ,data)))
-           (car ,data)
-           ,data))))
+(defmacro find-where (table where &key (order-by `(:desc :created_at)))
+  `(let ((data (retrieve-all
+                (select :*
+                  (from ,(key table))
+                  (where ,where)
+                  (order-by ,order-by))
+                :as ',table)))
+     (if (and (consp data) (null (cdr data)))
+         (car data)
+         data)))
+
+(defmacro select-where (table where &rest cols)
+  `(retrieve-one
+    (select ,cols
+      (from ,(key table))
+      (where ,where))))
 
 (defmacro create-model (table returning &rest cols)
   `(handler-case
