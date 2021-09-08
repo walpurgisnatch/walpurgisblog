@@ -28,7 +28,7 @@
   "update users (:id 1) :name john :sname doe"
   `(execute
     (update ,(key table)
-        (set= ,@(loop for col in cols collect col)
+        (set= ,@cols
          :updated_at (local-time:now))
         (where (:= ,@where)))))
 
@@ -42,3 +42,18 @@
        (if (and (consp ,data) (null (cdr ,data)))
            (car ,data)
            ,data))))
+
+(defmacro create-model (table returning &rest cols)
+  `(handler-case
+       (execute
+        (insert-into ,(key table)
+          (set= ,@cols
+                :created_at (local-time:now)
+                :updated_at (local-time:now))
+          (returning ,(key returning))))
+     (error () nil)))
+
+(defmacro delete-model (table where)
+  `(execute
+    (delete-from ,(key table)
+      (where ,where))))
