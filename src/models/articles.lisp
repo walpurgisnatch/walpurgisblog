@@ -3,34 +3,28 @@
   (:use :cl
         :walpurgisblog.models
         :sxql
-        :datafly)
+        :datafly
+        :walpurgisblog.utils)
   (:export  :get-articles
             :get-article
             :create-article
             :last-user-article
             :update-article
             :delete-article
-            :rate-article))
+            :rate-article
+            :update-test
+            :create-test))
 
 (in-package :walpurgisblog.articles)
 
 
 (defun get-article (id)
-  (let ((article (retrieve-one
-                  (select :*
-                    (from :articles)
-                    (where (:= :id id)))
-                  :as 'articles)))
+  (let ((article (car (find-where articles (:= :id id)))))
     (setf (articles-comments article) (articles-coms article))
     article))
 
 (defun get-articles (&optional (title ""))
-  (retrieve-all
-   (select :*
-     (from :articles)
-     (where (:like :title (concatenate 'string "%" title "%")))
-     (order-by (:desc :created_at)))
-   :as 'articles))
+  (find-where articles (:like :title (wildcard title))))
 
 (defun last-user-article (user)
   (retrieve-one
@@ -41,7 +35,7 @@
 
 (defun create-article (title body attachments user)
   (handler-case 
-      (execute
+      (retrieve-one
        (insert-into :articles
          (set= :title title
                :body body
@@ -52,7 +46,6 @@
                :updated_at (local-time:now))
          (returning :id)))
     (error (e) e)))
-
 
 (defun update-article (id title body attachments rating)
   (execute 

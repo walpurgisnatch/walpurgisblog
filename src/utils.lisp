@@ -7,7 +7,11 @@
   (:export :from-token
            :key
            :wildcard
-           :model-update))
+           :model-update
+           :find-where
+           :select-where
+           :create-model
+           :delete-model))
 
 (in-package :walpurgisblog.utils)
 
@@ -28,9 +32,12 @@
   "update users (:id 1) :name john :sname doe"
   `(execute
     (update ,(key table)
-        (set= ,@cols
-         :updated_at (local-time:now))
-        (where (:= ,@where)))))
+      (set= ,@(loop for i in cols by #'cddr
+                    for j in (cdr cols) by #'cddr
+                    unless (null j)
+                      collect i and collect j)
+            :updated_at (local-time:now))
+      (where (,@where)))))
 
 (defmacro find-where (table where &key (order-by `(:desc :created_at)))
   `(let ((data (retrieve-all
@@ -39,9 +46,7 @@
                   (where ,where)
                   (order-by ,order-by))
                 :as ',table)))
-     (if (and (consp data) (null (cdr data)))
-         (car data)
-         data)))
+     data))
 
 (defmacro select-where (table where &rest cols)
   `(retrieve-one
@@ -53,7 +58,10 @@
   `(handler-case
        (execute
         (insert-into ,(key table)
-          (set= ,@cols
+          (set= ,@(loop for i in cols by #'cddr
+                        for j in (cdr cols) by #'cddr
+                        unless (null j)
+                          collect i and collect j)
                 :created_at (local-time:now)
                 :updated_at (local-time:now))
           (returning ,(key returning))))

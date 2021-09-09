@@ -26,7 +26,7 @@
                  (:file "web" :depends-on ("view"))
                  (:file "view" :depends-on ("config"))
                  (:file "db" :depends-on ("config"))
-                 (:file "models" :depends-on ("config" "db"))
+                 (:file "models" :depends-on ("config" "db" "utils"))
                  (:file "config")))
                (:module "db"
                 :components
