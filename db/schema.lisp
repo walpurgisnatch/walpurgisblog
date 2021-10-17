@@ -4,7 +4,7 @@
 
 (in-package :walpurgisblog.schema)
 
-(mito:connect-toplevel :postgres :database-name "hack" :username "hack" :password "hack")
+(mito:connect-toplevel :postgres :database-name "walpurgisblog" :username "walpurgisblog" :password "walpurgisblog")
 
 (defun ensure-tables ()
   (mapcar #'ensure-table-exists '(users articles comments)))

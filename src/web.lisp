@@ -21,7 +21,7 @@
 ;;
 ;; Application
 
-;(datafly:connect-toplevel :postgres :database-name "hack" :username "hack" :password "hack")
+;(datafly:connect-toplevel :postgres :database-name "walpurgisblog" :username "walpurgisblog" :password "walpurgisblog")
 
 (defclass <web> (<app>) ())
 (defvar *web* (make-instance '<web>))
