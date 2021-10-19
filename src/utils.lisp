@@ -29,7 +29,7 @@
 ;;;; CRUD
 
 (defmacro model-update (table where &rest cols)
-  "update users (:id 1) :name john :sname doe"
+  "update users (:= :id 1) :name john :sname doe"
   `(execute
     (update ,(key table)
       (set= ,@(loop for i in cols by #'cddr

@@ -6,6 +6,7 @@
         :cl-annot.class
         :datafly)
   (:export :get-user
+           :get-user-list
            :get-users
            :find-user
            :create-user
@@ -35,6 +36,12 @@
      (where (:= :id id)))
    :as 'users))
 
+(defun get-user-list (id)
+  (retrieve-one
+   (select :*
+     (from :users)
+     (where (:= :id id)))))
+
 (defun find-user (name)
   (retrieve-one
    (select :*
@@ -51,7 +58,7 @@
 
 (defun create-user (name mail pass &key status (rating 0) (role 3))
   (handler-case 
-      (execute
+      (retrieve-one
        (insert-into :users
          (set= :name name
                :email mail
@@ -60,7 +67,8 @@
                :rating rating
                :role role
                :created_at (local-time:now)
-               :updated_at (local-time:now))))
+               :updated_at (local-time:now))
+         (returning :id)))
     (error (e) e)))
 
 (defun update-user (id name mail pass status)

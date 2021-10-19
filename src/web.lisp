@@ -22,6 +22,8 @@
 ;; Application
 
 ;(datafly:connect-toplevel :postgres :database-name "walpurgisblog" :username "walpurgisblog" :password "walpurgisblog")
+;(setf datafly:*connection* nil)
+
 
 (defclass <web> (<app>) ())
 (defvar *web* (make-instance '<web>))
@@ -91,12 +93,12 @@
   (setf (getf (response-headers *response*) :Access-Control-Allow-Origin) "*")
   (let ((token (login |username| |password|)))
     (if token
-        (render-json token)
+        (render-json (append (get-user-list 1) (list :token token)))
         (throw-code 400))))
 
 (defroute ("/api/signup" :method :POST) (&key |username| |email| |password| (|status| ""))
-  (unless (create-user |username| |email| |password| :status |status|)
-    (throw-code 200)))
+  (print (create-user |username| |email| |password| :status |status|))
+  (throw-code 200))
 
 (defroute "/logout" ()
   (logout))
