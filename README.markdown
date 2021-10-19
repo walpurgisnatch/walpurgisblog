@@ -1,5 +1,5 @@
 # walpurgisblog
-Source code for walpurgisblog
+Source code of the walpurgisblog
 
 
 ## Copyright
