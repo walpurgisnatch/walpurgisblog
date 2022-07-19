@@ -25,6 +25,28 @@
 
 (defun wildcard (string)
   (concatenate 'string "%" string "%"))
+
+(defun intern-keys (args)
+  (loop for key in args by #'cddr
+        for val in (cdr args) by #'cddr
+        collect (intern (string key) "KEYWORD")
+        collect val))
+
+(defmacro keys-and-vals (keys)
+  `(or ,@(loop for key in keys
+               collect `(eql x ,key)
+               collect `(equal x (getf list ,key)))))
+
+(defun only-vals (list)
+  (remove-if #'(lambda (x) (keys-and-vals (:statement :limit :offset :order-by))) list))
+
+(defun find-statements (statements)
+  (let ((list (only-vals statements)))
+    (loop for key in list by #'cddr
+          for val in (cdr list) by #'cddr
+          collect (list (if (stringp val) :like :=)
+                        key
+                        val))))
   
 ;;;; CRUD
 
@@ -39,12 +61,14 @@
             :updated_at (local-time:now))
       (where (,@where)))))
 
-(defmacro find-where (table where &key (order-by `(:desc :created_at)))
+(defmacro find-where (table where &key (order-by `(:desc :created_at)) (offset 0) (limit 10))
   `(let ((data (retrieve-all
                 (select :*
                   (from ,(key table))
                   (where ,where)
-                  (order-by ,order-by))
+                  (order-by ,order-by)
+                  (offset ,offset)
+                  (limit ,limit))
                 :as ',table)))
      data))
 

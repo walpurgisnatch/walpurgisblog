@@ -26,6 +26,9 @@
 (defun get-articles (&optional (title ""))
   (find-where articles (:like :title (wildcard title))))
 
+(defun find-articles (&rest args &key (statement :and) (title "") user (limit 10) (offset 0) (order-by `(:desc :created_at)))
+  `(find-where articles (,statement ,@(only-vals args)) :limit limit :offset offset :order-by order-by))
+
 (defun last-user-article (user)
   (retrieve-one
    (select :id

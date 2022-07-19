@@ -93,7 +93,7 @@
   (setf (getf (response-headers *response*) :Access-Control-Allow-Origin) "*")
   (let ((token (login |username| |password|)))
     (if token
-        (render-json (append (get-user-list 1) (list :token token)))
+        (render-json (append (get-user-list (from-token 'id token)) (list :token token)))
         (throw-code 400))))
 
 (defroute ("/api/signup" :method :POST) (&key |username| |email| |password| (|status| ""))

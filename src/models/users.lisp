@@ -2,6 +2,7 @@
 (defpackage walpurgisblog.users
   (:use :cl
         :walpurgisblog.models
+        :walpurgisblog.utils
         :sxql
         :cl-annot.class
         :datafly)
