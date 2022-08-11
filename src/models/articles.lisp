@@ -50,7 +50,7 @@
          (returning :id)))
     (error (e) e)))
 
-(defun update-article (id title body attachments rating)
+(defun update-article (id title body attachments)
   (execute 
    (update :articles
      (set= :title title
