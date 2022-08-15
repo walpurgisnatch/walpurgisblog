@@ -7,6 +7,7 @@
         :walpurgisblog.utils)
   (:export  :get-articles
             :get-article
+            :find-articles
             :create-article
             :last-user-article
             :update-article
@@ -26,8 +27,8 @@
 (defun get-articles (&optional (title ""))
   (find-where articles (:like :title (wildcard title))))
 
-(defun find-articles (&rest args &key (statement :and) (title "") user (limit 10) (offset 0) (order-by `(:desc :created_at)))
-  `(find-where articles (,statement ,@(only-vals args)) :limit limit :offset offset :order-by order-by))
+(defmacro find-articles (&rest args &key (statement :and) (type "%%") (title "%%") user (limit 10) (offset 0) (order-by `(:desc :created_at)))
+  `(find-where articles (,statement ,@(find-statements args)) :limit ,limit :offset ,offset :order-by ,order-by))
 
 (defun last-user-article (user)
   (retrieve-one
@@ -36,11 +37,12 @@
      (where (:= :user user))
      (order-by (:desc :created_at)))))
 
-(defun create-article (title body attachments user)
+(defun create-article (type title body attachments user)
   (handler-case 
       (retrieve-one
        (insert-into :articles
-         (set= :title title
+         (set= :type type
+               :title title
                :body body
                :attachments attachments
                :user user
@@ -50,13 +52,13 @@
          (returning :id)))
     (error (e) e)))
 
-(defun update-article (id title body attachments)
+(defun update-article (id type title body attachments)
   (execute 
    (update :articles
-     (set= :title title
+     (set= :type type
+           :title title
            :body body
-           :attachments attachments
-           :rating rating)
+           :attachments attachments)
      (where (:= :id id)))))
 
 (defun rate-article (id)

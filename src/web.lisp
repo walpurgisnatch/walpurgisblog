@@ -116,11 +116,11 @@
 (defroute "/api/article/:id" (&key id)
   (render-json (get-article id)))
 
-(defroute ("/api/articles" :method :POST) (&key |title| |body| |attachments| |user|)
-  (render-json (create-article |title| |body| |attachments| |user|)))
+(defroute ("/api/articles" :method :POST) (&key |type| |title| |body| |attachments| |user|)
+  (render-json (create-article |type| |title| |body| |attachments| |user|)))
 
-(defroute ("/api/article/:id" :method :POST) (&key id |title| |body| |attachments| |user|)
-  (render-json (update-article id |title| |body| |attachments|)))
+(defroute ("/api/article/:id" :method :POST) (&key id |type| |title| |body| |attachments|)
+  (render-json (update-article id |type| |title| |body| |attachments|)))
 
 (defroute "/api/comments/:id" (&key id)
   (render-json (get-comments id)))

@@ -40,6 +40,7 @@
                                  (where (:= :article id))
                                  (order-by (:desc :created_at)))))
   id
+  type
   title
   body
   attachments

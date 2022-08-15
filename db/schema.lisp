@@ -21,7 +21,8 @@
    (role          :col-type :integer)))
 
 (deftable articles ()
-  ((title         :col-type (:varchar 64))
+  ((type          :col-type (or (:varchar 64) :null))
+   (title         :col-type (:varchar 64))
    (body          :col-type :text)
    (attachments   :col-type (or (:varchar 128) :null))
    (user          :references users)

@@ -11,7 +11,8 @@
            :find-where
            :select-where
            :create-model
-           :delete-model))
+           :delete-model
+           :find-statements))
 
 (in-package :walpurgisblog.utils)
 
